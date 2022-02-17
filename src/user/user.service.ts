@@ -14,8 +14,29 @@ class UserService {
         try {
             const { id } = req.params;
             const user: any = await User.findOne(id)
-            const { password, ...rest } = user;
+            const { password, friends, ...rest } = user;
             return res.json({ user: rest })
+        } catch (error) {
+            return res.json(error)
+        }
+    }
+
+    async getUsers(req: any, res: Response) {
+        try {
+
+            const findUser = await User.findOne(req.user.id)
+            const users: any = await getConnection().createQueryBuilder(User, "user").select(["user.id", "user.name", "user.friends"]).getMany();
+            const filterme = users.filter((us: any) => us.id !== req.user.id)
+            let use: any = [];
+
+            filterme.forEach((ele: any) => {
+
+                if (!findUser.friends.includes(ele.id)) {
+                    use.push(ele)
+                }
+            })
+
+            res.json(use);
         } catch (error) {
             return res.json(error)
         }
@@ -61,9 +82,9 @@ class UserService {
                 email: user.email
             }
             const accessToken = jwt.sign(payload, "misecreto")
-            return res.json({ accessToken })
+            return res.json({ accessToken, ok: true, message: "correcto inicio de sesion", id: user.id })
         } catch (error) {
-            return res.json("some error")
+            return res.json({ message: "some error", ok: false })
 
         }
     }
@@ -91,11 +112,11 @@ class UserService {
         }
     }
 
-    // ver peticiones de amistad, funciona
+    // ver peticiones de amistad pendientes, funciona
     async request(req: any, res: Response) {
         try {
             let myid = req.user.id;
-            const getRequest = await Friend.find({ where: { receiver_id: myid } })
+            const getRequest = await Friend.find({ where: { receiver_id: myid, status: 2 } })
             res.json({ error: null, request: getRequest });
         } catch (error) {
             res.json({ error, message: "something goes wrong" });
@@ -103,12 +124,13 @@ class UserService {
     }
 
     async accept(req: any, res: Response) {
+
         const { option } = req.body;
         let myid = req.user.id;
         const friendId = req.params.requesterId;
         if (option === "aceptar") {
             const request: any = await Friend.findOne({ where: { requester_id: friendId, receiver_id: myid } })
-            console.log(request);
+            // console.log(request);
 
             const me: any = await User.findOne(myid);
             const friend: any = await User.findOne(friendId);
@@ -135,6 +157,16 @@ class UserService {
                 return res.json({ error, message: "something goes wrong" })
             }
 
+        }
+    }
+
+    async userFriends(req: any, res: Response) {
+        try {
+            const myid = req.user.id;
+            const findUser = await User.findOne(myid)
+            res.json(findUser.friends)
+        } catch (error) {
+            res.json({ message: "some error", error })
         }
     }
 

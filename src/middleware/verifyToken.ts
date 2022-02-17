@@ -5,7 +5,9 @@ import { User } from "../user/user.entity";
 // funciona bien
 export const verifyToken = async (req: any, res: Response, next: NextFunction) => {
     try {
+
         const accessToken = req.headers["authorization"]?.split(" ")[1];
+
         if (!accessToken) {
             throw "requiere tpken"
         }

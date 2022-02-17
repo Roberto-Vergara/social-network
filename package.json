@@ -7,13 +7,14 @@
     "start:build": "tsc --watch",
     "start:dev": "nodemon dist/server.js",
     "build": "tsc",
-    "start:": "node dist/server.js"
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "dotenv": "^8.6.0",
     "express": "^4.17.2",
     "mysql2": "^2.3.3",
@@ -23,6 +24,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/uuid": "^8.3.4"
   }
